@@ -1,0 +1,10 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^inst/trash$
+^man-roxygen$
+^\.github$
+^inst/images$
+^cran-comments\.md$
+^CRAN-SUBMISSION$
+^inst/keep$
+^inst/gifs$

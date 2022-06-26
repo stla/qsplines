@@ -5,6 +5,6 @@
 #' @export
 #' @importFrom shiny shinyAppDir
 shinyKBS <- function(){
-  appDir <- system.file("shiny", "threejs", package = "onion")
+  appDir <- system.file("shiny", "threejs", package = "qsplines")
   shinyAppDir(appDir, options = list(launch.browser = TRUE))
 }

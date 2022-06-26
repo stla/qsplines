@@ -10,4 +10,5 @@ Quaternions splines. Based on the Python library 'splines'.
 
 ![](https://raw.githubusercontent.com/stla/qsplines/main/inst/gifs/KochanekBartels_varyingContinuity.gif)
 
+![](https://raw.githubusercontent.com/stla/qsplines/main/inst/gifs/shinyKBS.gif)
 

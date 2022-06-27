@@ -73,7 +73,7 @@ for(i in seq_len(n_keyPoints - 1L)){
 }
 
 # Barry-Goldman quaternions spline
-rotors <- BarryGoldman(keyRotors, n_intertimes = 10L)
+\donttest{rotors <- BarryGoldman(keyRotors, n_intertimes = 10L)
 
 # construction of the interpolating points on the sphere
 points <- matrix(nrow = 0L, ncol = 3L)
@@ -86,5 +86,5 @@ for(i in seq_along(rotors)){
 library(rgl)
 spheres3d(0, 0, 0, radius = 5, color = "lightgreen")
 spheres3d(points, radius = 0.2, color = "midnightblue")
-spheres3d(keyPoints, radius = 0.25, color = "red")
+spheres3d(keyPoints, radius = 0.25, color = "red")}
 }

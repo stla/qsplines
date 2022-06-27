@@ -18,6 +18,7 @@ Get a unit quaternion whose corresponding rotation sends
   \code{u} to \code{v}; the vectors \code{u} and \code{v} must be normalized.
 }
 \examples{
+library(qsplines)
 u <- c(1, 1, 1) / sqrt(3)
 v <- c(1, 0, 0)
 q <- quaternionFromTo(u, v)

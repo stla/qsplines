@@ -16,6 +16,7 @@
 #'   to \code{v}.
 #' @export
 #' @examples
+#' library(qsplines)
 #' u <- c(1, 1, 1) / sqrt(3)
 #' v <- c(1, 0, 0)
 #' q <- quaternionFromTo(u, v)

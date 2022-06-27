@@ -75,6 +75,7 @@
 #' @export
 #'
 #' @examples
+#' library(qsplines)
 #' interpolateTimes(1:4, n = 3)
 #' interpolateTimes(c(1, 2, 4), n = 3)
 interpolateTimes <- function(times, n, last = TRUE){

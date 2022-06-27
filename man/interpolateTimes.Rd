@@ -22,6 +22,7 @@ Linearly interpolate an increasing vector of times. This is
   useful to deal with the quaternions splines.
 }
 \examples{
+library(qsplines)
 interpolateTimes(1:4, n = 3)
 interpolateTimes(c(1, 2, 4), n = 3)
 }

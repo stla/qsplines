@@ -3,7 +3,7 @@
 #'   method.
 #'
 #' @param keyRotors a vector of unit quaternions (rotors) to be interpolated;
-#'   it is automatically appended with the first quaternion
+#'   it is automatically appended with the first one to have a closed spline
 #' @param keyTimes the times corresponding to the key rotors; must be an
 #'   increasing vector of length \code{length(keyRotors)+1}; if \code{NULL},
 #'   it is set to \code{c(1, 2, ..., length(keyRotors)+1)}
@@ -13,17 +13,19 @@
 #' @param n_intertimes should be missing if \code{times} is given; otherwise,
 #'   \code{keyTimes} should be \code{NULL} and \code{times} is constructed by
 #'   linearly interpolating the automatic key times such that there are
-#'   \code{n_intertimes - 1} between two key times (so the times are the key
-#'   times if \code{n_intertimes = 1})
+#'   \code{n_intertimes - 1} times between two key times (so the times are the 
+#'   key times if \code{n_intertimes = 1})
 #'
 #' @return A vector of unit quaternions with the same length as \code{times}.
 #' @export
 #' @note The function does not check whether the quaternions given in
 #'   \code{keyRotors} are unit quaternions.
 #'
-#' @examples library(onion)
-#' # We will use a Barry-Goldman quaternions spline to construct a spherical
-#' #   curve interpolating some key points on the sphere of radius 5.
+#' @examples 
+#' library(qsplines)
+#' # Using a Barry-Goldman quaternions spline to construct 
+#' #   a spherical curve interpolating some key points on
+#' #   the sphere of radius 5.
 #'
 #' # helper function: spherical to Cartesian coordinates
 #' sph2cart <- function(rho, theta, phi){
@@ -44,13 +46,16 @@
 #' }
 #' n_keyPoints <- nrow(keyPoints)
 #'
-#' # construction of the key rotors; the first key rotor is the identity
-#' #   quaternion and rotor i sends the first key point to the key point i
+#' # construction of the key rotors; the first key rotor is the 
+#' #   identity quaternion and rotor i sends the first key point 
+#' #   to the key point i
 #' keyRotors <- quaternion(length.out = n_keyPoints)
 #' rotor <- keyRotors[1L] <- H1
 #' for(i in seq_len(n_keyPoints - 1L)){
 #'   keyRotors[i+1L] <- rotor <-
-#'     quaternionFromTo(keyPoints[i, ]/5, keyPoints[i+1L, ]/5) * rotor
+#'     quaternionFromTo(
+#'       keyPoints[i, ]/5, keyPoints[i+1L, ]/5
+#'     ) * rotor
 #' }
 #'
 #' # Barry-Goldman quaternions spline

@@ -10,7 +10,9 @@ Authors@R: c(
 Description: Provides routines to create some quaternions splines:
     Barry-Goldman algorithm, De Casteljau algorithm, and Kochanek-Bartels
     algorithm. The implementations are based on the Python library
-    'splines'. Quaternions splines allow to construct spherical curves.
+    'splines'. Quaternions splines allow to construct spherical curves. 
+    References: Barry and Goldman <doi:10.1145/54852.378511>, 
+    Kochanek and Bartels <doi:10.1145/800031.808575>.
 License: GPL-3
 URL: https://github.com/stla/qsplines
 BugReports: https://github.com/stla/qsplines/issues

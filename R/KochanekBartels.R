@@ -42,6 +42,9 @@
 #' @return A vector of quaternions having the same length as \code{times},
 #'   or a function if \code{constantSpeed=TRUE}.
 #' @export
+#' 
+#' @importFrom stats integrate uniroot
+#' @importFrom utils head
 #'
 #' @note This algorithm is rather for internal purpose. It serves for example
 #'   as a base for the \link[=KochanekBartels]{Konachek-Bartels} algorithm.

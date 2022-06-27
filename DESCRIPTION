@@ -19,7 +19,9 @@ BugReports: https://github.com/stla/qsplines/issues
 Depends: 
     onion
 Imports: 
-    shiny
+    shiny,
+    stats,
+    utils
 Suggests:
     rgl
 Encoding: UTF-8

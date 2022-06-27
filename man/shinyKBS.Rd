@@ -2,7 +2,7 @@
 % Please edit documentation in R/shinyKBS.R
 \name{shinyKBS}
 \alias{shinyKBS}
-\title{Shiny demo}
+\title{Shiny demonstration of Kochanek-Bartels spline}
 \usage{
 shinyKBS()
 }

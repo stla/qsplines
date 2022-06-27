@@ -1,4 +1,4 @@
-#' @title Shiny demo
+#' @title Shiny demonstration of Kochanek-Bartels spline
 #' @description Run a Shiny app which demonstrates the Kochanek-Bartels spline.
 #'
 #' @return No value returned.

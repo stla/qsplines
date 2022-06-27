@@ -220,7 +220,7 @@ DeCasteljau <- function(
 #'   times if \code{n_intertimes = 1})
 #' @param endcondition start/end conditions, can be \code{"closed"} or
 #'   \code{"natural"}
-#' @param constantSpeed Boolean, whether to re-parameterize the spline to
+#' @param constantSpeed Boolean, whether to re-parametrize the spline to
 #'   have constant speed; in this case, \code{"times"} is ignored and a
 #'   function is returned, with an attribute \code{"times"}, the vector of
 #'   new times corresponding to the key rotors
@@ -229,6 +229,8 @@ DeCasteljau <- function(
 #'   vector, or a (slow) function if \code{constantSpeed=TRUE}.
 #' @export
 #'
+#' @note The algorithm with constant speed is very slow.
+#' 
 #' @examples 
 #' library(qsplines)
 #' # Using a Kochanek-Bartels quaternions spline to construct 

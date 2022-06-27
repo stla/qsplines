@@ -39,7 +39,7 @@ times if \code{n_intertimes = 1})}
 \item{endcondition}{start/end conditions, can be \code{"closed"} or
 \code{"natural"}}
 
-\item{constantSpeed}{Boolean, whether to re-parameterize the spline to
+\item{constantSpeed}{Boolean, whether to re-parametrize the spline to
 have constant speed; in this case, \code{"times"} is ignored and a
 function is returned, with an attribute \code{"times"}, the vector of
 new times corresponding to the key rotors}
@@ -51,6 +51,9 @@ A vector of quaternions having the same length as the \code{times}
 \description{
 Constructs a quaternions spline by the Kochanek-Bartels
   algorithm.
+}
+\note{
+The algorithm with constant speed is very slow.
 }
 \examples{
 library(qsplines)

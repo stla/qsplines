@@ -53,10 +53,11 @@ Constructs a quaternions spline by the Kochanek-Bartels
   algorithm.
 }
 \examples{
-library(onion)
-# We will use a Kochanek-Bartels quaternions spline to construct a spherical
-#   curve interpolating some key points on the sphere of radius 5
-
+library(qsplines)
+# Using a Kochanek-Bartels quaternions spline to construct 
+#   a spherical curve interpolating some key points on the 
+#     sphere of radius 5
+    
 # helper function: spherical to Cartesian coordinates
 sph2cart <- function(rho, theta, phi){
   return(c(
@@ -76,18 +77,22 @@ for(theta in theta_){
 }
 n_keyPoints <- nrow(keyPoints)
 
-# construction of the key rotors; the first key rotor is the identity
-#   quaternion and rotor i sends the key point i-1 to the key point i
+# construction of the key rotors; the first key rotor 
+#   is the identity quaternion and rotor i sends the 
+#     key point i-1 to the key point i
 keyRotors <- quaternion(length.out = n_keyPoints)
 rotor <- keyRotors[1L] <- H1
 for(i in seq_len(n_keyPoints - 1L)){
   keyRotors[i+1L] <- rotor <-
-    quaternionFromTo(keyPoints[i, ]/5, keyPoints[i+1L, ]/5) * rotor
+    quaternionFromTo(
+      keyPoints[i, ]/5, keyPoints[i+1L, ]/5
+    ) * rotor
 }
 
 # Kochanek-Bartels quaternions spline
-rotors <- KochanekBartels(
-  keyRotors, n_intertimes = 25L, endcondition = "closed", tcb = c(-1, 5, 0)
+\donttest{rotors <- KochanekBartels(
+  keyRotors, n_intertimes = 25L, 
+  endcondition = "closed", tcb = c(-1, 5, 0)
 )
 
 # construction of the interpolating points on the sphere
@@ -101,5 +106,5 @@ for(i in seq_along(rotors)){
 library(rgl)
 spheres3d(0, 0, 0, radius = 5, color = "lightgreen")
 spheres3d(points, radius = 0.2, color = "midnightblue")
-spheres3d(keyPoints, radius = 0.25, color = "red")
+spheres3d(keyPoints, radius = 0.25, color = "red")}
 }

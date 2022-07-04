@@ -355,5 +355,9 @@ KochanekBartels <- function(
   segments <- lapply(4L*seq_len(length(control_points) %/% 4L)-3L, function(i){
     control_points[c(i, i+1L, i+2L, i+3L)]
   })
-  DeCasteljau(segments, keyTimes, times = times, constantSpeed = constantSpeed)
+  if(constantSpeed){
+    DeCasteljau(segments, keyTimes, times = times, constantSpeed = TRUE)
+  }else{
+    DeCasteljauCPP(segments, keyTimes, times)
+  }
 }

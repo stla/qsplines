@@ -5,3 +5,11 @@ DeCasteljau_cpp <- function(rsegments, keyTimes, times) {
     .Call(`_qsplines_DeCasteljau_cpp`, rsegments, keyTimes, times)
 }
 
+cpp_calculate_control_quaternions <- function(Rquaternions, times, t, c, b) {
+    .Call(`_qsplines_cpp_calculate_control_quaternions`, Rquaternions, times, t, c, b)
+}
+
+control_points_cpp <- function(keyTimesR, keyRotorsR, closed, t, c, b) {
+    .Call(`_qsplines_control_points_cpp`, keyTimesR, keyRotorsR, closed, t, c, b)
+}
+

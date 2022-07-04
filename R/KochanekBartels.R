@@ -178,7 +178,7 @@ DeCasteljau <- function(
       times,
       times[n_times] + (times[2L] - times[1L])
     )
-    triples_times <- t(vapply(seq_len(n_times+1L), function(i){
+    triples_times <- t(vapply(seq_len(n_times), function(i){
       times[c(i, i+1L, i+2L)]
     }, numeric(3L)))
     triples_rotors <- lapply(seq_len(n_rotors), function(i){
@@ -308,23 +308,34 @@ KochanekBartels <- function(
     }
   }
   keyTimes <- .check_keyTimes(keyTimes, n_keyRotors)
-  triples <- .check_endcondition(endcondition, keyRotors, keyTimes)
-  triples_rotors <- triples[["rotors"]]
-  triples_times <- triples[["times"]]
-  control_points <- quaternion(length.out = 0L)
-  for(i in seq_along(triples_rotors)){
-    qs <- triples_rotors[[i]]
-    qb_qa <- .calculate_control_quaternions(
-      qs,
-      triples_times[i, ],
-      tcb
-    )
-    q_before <- qb_qa[1L]
-    q_after  <- qb_qa[2L]
-    control_points <- c(
-      control_points, q_before, qs[2L], qs[2L], q_after
-    )
-  }
+  control_points <- as.quaternion(control_points_cpp(
+    keyTimes, as.matrix(keyRotors), closed, tcb[1L], tcb[2L], tcb[3L]
+  ))
+  # triples <- .check_endcondition(endcondition, keyRotors, keyTimes)
+  # triples_rotors <- triples[["rotors"]]
+  # triples_times <- triples[["times"]]
+  # triples_rotors <- makeTriplets_rotors(as.matrix(keyRotors), closed)
+  # triples_times <- makeTriplets_times(keyTimes, closed)
+  # control_points <- quaternion(length.out = 0L)
+  # for(i in seq_along(triples_rotors)){
+  #   qs <- as.quaternion(triples_rotors[[i]])
+  #   # qb_qa <- .calculate_control_quaternions(
+  #   #   qs,
+  #   #   triples_times[i, ],
+  #   #   tcb
+  #   # )
+  #   qb_qa <- as.quaternion(cpp_calculate_control_quaternions(
+  #     as.matrix(qs),
+  #     triples_times[i, ],
+  #     tcb[1], tcb[2], tcb[3]
+  #   ))
+  #   
+  #   q_before <- qb_qa[1L]
+  #   q_after  <- qb_qa[2L]
+  #   control_points <- c(
+  #     control_points, q_before, qs[2L], qs[2L], q_after
+  #   )
+  # }
   n_control_points <- length(control_points)
   if(closed){
     stopifnot(4*length(keyTimes) == n_control_points)

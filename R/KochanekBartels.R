@@ -195,10 +195,8 @@ DeCasteljau <- function(
   list("times" = triples_times, "rotors" = triples_rotors)
 }
 
-.natural_control_quaternion <- function(outer, inner_control, inner){
-  (
-    (inner_control * onion_inverse(inner)) * (inner * onion_inverse(outer))
-  )^(1 / 2) * outer
+.natural_control_quaternion <- function(outer, inner_control){
+  (inner_control * onion_inverse(outer))^(1 / 2) * outer
 }
 
 #' @title Kochanek-Bartels quaternions spline
@@ -352,13 +350,11 @@ KochanekBartels <- function(
     control_points <- c(
       keyRotors[1L],
       .natural_control_quaternion(
-        keyRotors[1L], control_points[1L], control_points[2L]
+        keyRotors[1L], control_points[1L]
       ),
       control_points,
       .natural_control_quaternion(
-        keyRotors[n_keyRotors],
-        control_points[n_control_points],
-        control_points[n_control_points-1L]
+        keyRotors[n_keyRotors], control_points[n_control_points]
       ),
       keyRotors[n_keyRotors]
     )

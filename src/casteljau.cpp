@@ -221,8 +221,10 @@ std::vector<std::array<qtrn, 3>> makeTriplets_rotors(std::vector<qtrn> rotors, b
   return makeTriplets<qtrn>(rotors);
 }
 
-qtrn _natural_control_quaternion(qtrn outer, qtrn inner_control, qtrn inner){
-  return quaternion::pow(inner_control * quaternion::inverse(outer), 0.5) * outer;
+qtrn _natural_control_quaternion(qtrn outer, qtrn inner_control){
+  return quaternion::pow(
+    inner_control * quaternion::inverse(outer), 0.5
+  ) * outer;
 }
 
 // [[Rcpp::export]]

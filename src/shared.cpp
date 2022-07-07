@@ -44,9 +44,8 @@ std::size_t _check_time(double t, Rcpp::NumericVector keyTimes, bool special) {
   std::size_t n_keyTimes = keyTimes.size();
   double lastKeyTime = keyTimes(n_keyTimes - 1);
   if(t < keyTimes(0) || t > lastKeyTime) {
-    Rcpp::Rcout << "ttttttttttttttt: " << t << " ------ ";
     Rcpp::stop(
-        "The interpolating times must be within the range of `keyTimes`."
+      "The interpolating times must be within the range of `keyTimes`."
     );
   }
   std::size_t idx;
@@ -91,8 +90,6 @@ Rcpp::NumericVector _interpolateTimes(Rcpp::NumericVector times,
     const Rcpp::NumericVector vi = _seq(times(i), times(i + 1), n + 1);
     for(std::size_t j = 0; j < n; j++) {
       newtimes(k) = vi(j);
-      // Rcpp::Rcout << "k: " <<  k << " ooo ";
-      Rcpp::Rcout << "k: " <<  vi(j) << " ooo ";
       k++;
     }
   }

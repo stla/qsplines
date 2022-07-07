@@ -56,7 +56,7 @@ Rcpp::NumericMatrix _getCQuaternions(std::vector<qtrn> quats) {
 std::vector<qtrn> _reduce_de_casteljau(std::vector<qtrn> segment, double t) {
   size_t l = segment.size();
   if(l < 2) {
-    Rcpp::stop("Segment must have at least two quaternions.");
+    Rcpp::stop("Each segment must have at least two quaternions.");
   }
   while(l > 2) {
     std::vector<qtrn> newsegment(l - 1);
@@ -155,7 +155,9 @@ std::vector<std::array<T, 3>> makeTriplets(std::vector<T> vec) {
   return triplets;
 }
 
-std::vector<std::array<double, 3>> makeTriplets_times(std::vector<double> times, bool closed) {
+std::vector<std::array<double, 3>> makeTriplets_times(
+  std::vector<double> times, bool closed
+) {
   if(closed){
     const std::size_t ntimes = times.size();
     double t1 = times[ntimes-1] + (times[1] - times[0]);
@@ -165,7 +167,9 @@ std::vector<std::array<double, 3>> makeTriplets_times(std::vector<double> times,
   return makeTriplets<double>(times);
 }
 
-std::vector<std::array<qtrn, 3>> makeTriplets_rotors(std::vector<qtrn> rotors, bool closed) {
+std::vector<std::array<qtrn, 3>> makeTriplets_rotors(
+  std::vector<qtrn> rotors, bool closed
+) {
   if(closed){
     const std::size_t nrotors = rotors.size();
     qtrn prefix = rotors[nrotors - 2];
@@ -216,7 +220,7 @@ Rcpp::NumericMatrix control_points_cpp(
   return _getCQuaternions(control_points);
 }
 
-////////////////////////////////////////////////////////////////////////////////
+/// CONSTANT SPEED /////////////////////////////////////////////////////////////
 
 double _eval2_casteljau_single(double t,
                                std::vector<std::vector<qtrn>> segments,
@@ -245,24 +249,24 @@ std::vector<qtrn> _eval2_casteljau_vector(
     double t0 = keyTimes[i];
     double t1 = keyTimes[i+1];
     double error;
-    integrated_speed[i] = gauss_kronrod<double, 61>::integrate(speed, t0, t1, 0, 0, &error);
+    integrated_speed[i] = 
+      gauss_kronrod<double, 61>::integrate(speed, t0, t1, 0, 0, &error);
   }
   Rcpp::NumericVector newTimes(nintervals+1);
   newTimes[0] = 0;
   for(std::size_t i = 1; i <= nintervals; i++){
     newTimes[i] = newTimes[i-1] + integrated_speed[i-1];
   }
-  Rcpp::Rcout << "LAST NEWTIME: " << newTimes(nintervals) << "  - ";
   Rcpp::NumericVector stimes = _interpolateTimes(newTimes, nintertimes, false);
   const std::size_t S = stimes.size();
   Rcpp::NumericVector times(S);
   for(std::size_t i = 0; i < S; i++){
     double s = stimes(i);
     if(s == newTimes(nintervals)){ // i.e dernier i ?
-      Rcpp::Rcout << "FIRST IF; i = " << i << " --- ";
+      Rcpp::Rcout << "FIRST IF; i = " << i << " --- "; // this never happens
       times(i) = keyTimes(nintervals); // -1 ?
     }else if(s <= newTimes(0)){ // i.e. i=0
-      Rcpp::Rcout << "SECOND IF; i = " << i << " --- ";
+      Rcpp::Rcout << "SECOND IF; i = " << i << " --- "; // this happens for i=0
       times(i) = keyTimes(0);
     }else{
       const std::size_t idx = _check_time(s, newTimes, false);
@@ -271,7 +275,8 @@ std::vector<qtrn> _eval2_casteljau_vector(
       double t1 = keyTimes[idx+1];
       auto igspeed = [speed, t0, s](double t) {
         double error;
-        return gauss_kronrod<double, 61>::integrate(speed, t0, t, 0, 0, &error) - s;
+        return 
+          gauss_kronrod<double, 61>::integrate(speed, t0, t, 0, 0, &error) - s;
       };
       std::pair<double, double> root = boost::math::tools::bisect(
         igspeed,
@@ -279,7 +284,6 @@ std::vector<qtrn> _eval2_casteljau_vector(
         [](double l, double r){return abs(l-r) < 1e-12;}
       );
       times(i) = (root.first + root.second) / 2.0;
-      Rcpp::Rcout << "TIMES(i):::::::::::::::: " << times(i) << " --- ";
     }
   }
   return _eval_casteljau_vector(times, segments, keyTimes);
@@ -297,21 +301,12 @@ Rcpp::NumericMatrix DeCasteljau_cpp2(
     Rcpp::stop("Number of key times must be one more than number of segments.");
   }
   std::vector<std::vector<qtrn>> segments = _getRSegments(rsegments);
-  std::vector<qtrn> quats = _eval2_casteljau_vector(segments, keyTimes, nintertimes);
+  std::vector<qtrn> quats = _eval2_casteljau_vector(
+    segments, keyTimes, nintertimes
+  );
   return _getCQuaternions(quats);
 }
 
-// std::vector<qtrn> _eval2_casteljau_vector(
-//     Rcpp::NumericVector times,
-//     std::vector<std::vector<qtrn>> segments,
-//     Rcpp::NumericVector keyTimes) {
-//   std::size_t n = times.size();
-//   std::vector<qtrn> quats(n);
-//   for(std::size_t i = 0; i < n; i++) {
-//     quats[i] = _eval2_casteljau_single(times(i), segments, keyTimes);
-//   }
-//   return quats;
-// }
 
 // {} []
 // // [[Rcpp::export]]

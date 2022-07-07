@@ -37,9 +37,9 @@ for(i in seq_len(n_keyPoints - 1L)){
  
 # Kochanek-Bartels quaternions spline
 rotors <- KochanekBartels(
-  keyRotors, n_intertimes = 10L, constantSpeed = FALSE,
+  keyRotors, n_intertimes = 10L, constantSpeed = TRUE,
   endcondition = "closed", tcb = c(0, 0, 0), 
-  keyTimes = c(1, 3, 5, 6, 7, 8, 9, 10, 11)
+  keyTimes = NULL
   # times = interpolateTimes(c(1, 3, 4, 5, 6, 7, 8, 9, 10), 15)
 )
 

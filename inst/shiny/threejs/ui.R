@@ -25,9 +25,13 @@ shinyUI(
         ),
         actionButton("run", "Go", class = "btn-info btn-block"),
         br(),
+        tags$div(
+          style = "float: right;",
+          checkboxInput("cstspeed", "Constant speed")
+        ),
         helpText(
           "When you see the spinner at the bottom left, a spline is under",
-          "calculation. Please wait"
+          "calculation. Please wait."
         )
       ),
       mainPanel(

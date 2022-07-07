@@ -1,4 +1,4 @@
-library(onion)
+library(qsplines)
 
 # spherical to Cartesian coordinates
 sph2cart <- function(rho, theta, phi){
@@ -29,10 +29,11 @@ for(i in seq_len(n_keyPoints - 1L)){
     quaternionFromTo(keyPoints[i, ]/5, keyPoints[i+1L, ]/5) * rotor
 }
 
-Spline <- function(tcb){
+Spline <- function(tcb, constantSpeed){
   # Kochanek-Bartels quaternions spline
   rotors <- KochanekBartels(
-    keyRotors, n_intertimes = 15L, endcondition = "closed", tcb = tcb
+    keyRotors, n_intertimes = 17L, endcondition = "closed", tcb = tcb, 
+    constantSpeed = constantSpeed
   )
   # construction of the interpolating points on the sphere
   points <- matrix(nrow = 0L, ncol = 3L)
@@ -46,9 +47,11 @@ Spline <- function(tcb){
 shinyServer(
   function(input, output, session){
 
-    observeEvent(input[["run"]], {
-      spline <- 
-        Spline(c(input[["numt"]], input[["numc"]], input[["numb"]]))
+    observeEvent(list(input[["run"]], input[["cstspeed"]]), {
+      spline <- Spline(
+        c(input[["numt"]], input[["numc"]], input[["numb"]]), 
+        input[["cstspeed"]]
+      )
       session$sendCustomMessage("spline", spline)
     })   
 

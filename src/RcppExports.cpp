@@ -23,21 +23,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// cpp_calculate_control_quaternions
-Rcpp::NumericMatrix cpp_calculate_control_quaternions(Rcpp::NumericMatrix Rquaternions, Rcpp::NumericVector times, double t, double c, double b);
-RcppExport SEXP _qsplines_cpp_calculate_control_quaternions(SEXP RquaternionsSEXP, SEXP timesSEXP, SEXP tSEXP, SEXP cSEXP, SEXP bSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type Rquaternions(RquaternionsSEXP);
-    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type times(timesSEXP);
-    Rcpp::traits::input_parameter< double >::type t(tSEXP);
-    Rcpp::traits::input_parameter< double >::type c(cSEXP);
-    Rcpp::traits::input_parameter< double >::type b(bSEXP);
-    rcpp_result_gen = Rcpp::wrap(cpp_calculate_control_quaternions(Rquaternions, times, t, c, b));
-    return rcpp_result_gen;
-END_RCPP
-}
 // control_points_cpp
 Rcpp::NumericMatrix control_points_cpp(Rcpp::NumericVector keyTimesR, Rcpp::NumericMatrix keyRotorsR, bool closed, double t, double c, double b);
 RcppExport SEXP _qsplines_control_points_cpp(SEXP keyTimesRSEXP, SEXP keyRotorsRSEXP, SEXP closedSEXP, SEXP tSEXP, SEXP cSEXP, SEXP bSEXP) {
@@ -54,11 +39,24 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// DeCasteljau_cpp2
+Rcpp::NumericMatrix DeCasteljau_cpp2(Rcpp::List rsegments, Rcpp::NumericVector keyTimes, std::size_t nintertimes);
+RcppExport SEXP _qsplines_DeCasteljau_cpp2(SEXP rsegmentsSEXP, SEXP keyTimesSEXP, SEXP nintertimesSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::List >::type rsegments(rsegmentsSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type keyTimes(keyTimesSEXP);
+    Rcpp::traits::input_parameter< std::size_t >::type nintertimes(nintertimesSEXP);
+    rcpp_result_gen = Rcpp::wrap(DeCasteljau_cpp2(rsegments, keyTimes, nintertimes));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_qsplines_DeCasteljau_cpp", (DL_FUNC) &_qsplines_DeCasteljau_cpp, 3},
-    {"_qsplines_cpp_calculate_control_quaternions", (DL_FUNC) &_qsplines_cpp_calculate_control_quaternions, 5},
     {"_qsplines_control_points_cpp", (DL_FUNC) &_qsplines_control_points_cpp, 6},
+    {"_qsplines_DeCasteljau_cpp2", (DL_FUNC) &_qsplines_DeCasteljau_cpp2, 3},
     {NULL, NULL, 0}
 };
 

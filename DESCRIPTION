@@ -16,12 +16,11 @@ Description: Provides routines to create some quaternions splines:
 License: GPL-3
 URL: https://github.com/stla/qsplines
 BugReports: https://github.com/stla/qsplines/issues
-LinkingTo: Rcpp
+LinkingTo: Rcpp, BH
 Depends: 
     onion
 Imports: 
     shiny,
-    stats,
     utils,
     Rcpp
 Suggests:

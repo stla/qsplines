@@ -1,26 +1,14 @@
-.select_segment_and_normalize_t <- function(segments, keyTimes, t){
-  idx <- .check_time(t, keyTimes) #+ 1L
-  t0 <- keyTimes[idx]
-  t1 <- keyTimes[idx+1L]
-  delta_t <- t1 - t0
-  t <- (t - t0) / delta_t
-  list("segment" = segments[[idx]], "time" = t, "difftime" = delta_t)
+.getQMatrix <- function(quaternions){
+  stopifnot(is.quaternion(quaternions))
+  as.matrix(quaternions)
 }
 
-.reduce_de_casteljau <- function(segment, t){
-  if(length(segment) < 2L){
-    stop("Segment must have at least two quaternions.")
-  }
-  while(length(segment) > 2L){
-    newsegment <- quaternion(length.out = length(segment) - 1L)
-    for(i in seq_len(length(segment)-1L)){
-      one <- segment[i]
-      two <- segment[i+1L]
-      newsegment[i] <- .slerp(one, two, t)
-    }
-    segment <- newsegment
-  }
-  segment
+.isNumericVector <- function(x){
+  is.numeric(x) && !anyNA(x)
+}
+
+.isBoolean <- function(x){
+  is.logical(x) && length(x) == 1L && !is.na(x)
 }
 
 #' @title Spline using the De Casteljau algorithm
@@ -32,8 +20,15 @@
 #' @param keyTimes the times corresponding to the segment boundaries, an
 #'   increasing vector of length \code{length(segments)+1}; if \code{NULL},
 #'   it is set to \code{1, 2, ..., length(segments)+1}
+#' @param n_intertimes a positive integer used to linearly interpolate the 
+#'   times given in \code{keyTimes} in order that there are
+#'   \code{n_intertimes - 1} between two key times (so one gets the key
+#'   times if \code{n_intertimes = 1}); this parameter must be given if 
+#'   \code{constantSpeed=TRUE} and if it is given when 
+#'   \code{constantSpeed=FALSE}, then it has precedence over \code{times}
 #' @param times the interpolating times, they must lie within the range of
-#'   \code{keyTimes}; ignored if \code{constantSpeed=TRUE}
+#'   \code{keyTimes}; ignored if \code{constantSpeed=TRUE} or if 
+#'   \code{n_intertimes} is given
 #' @param constantSpeed Boolean, whether to re-parameterize the spline to
 #'   have constant speed; in this case, \code{"times"} is ignored and a
 #'   function is returned, with an attribute \code{"times"}, the vector of
@@ -43,156 +38,43 @@
 #'   or a function if \code{constantSpeed=TRUE}.
 #' @export
 #' 
-#' @importFrom stats integrate uniroot
-#' @importFrom utils head
-#'
 #' @note This algorithm is rather for internal purpose. It serves for example
 #'   as a base for the \link[=KochanekBartels]{Konachek-Bartels} algorithm.
 DeCasteljau <- function(
-  segments, keyTimes = NULL, times, constantSpeed = FALSE
+  segments, keyTimes = NULL, n_intertimes, times, constantSpeed = FALSE
 ){
+  stopifnot(is.list(segments))
+  stopifnot(is.null(keyTimes) || .isNumericVector(keyTimes))
+  stopifnot(missing(n_intertimes) || .isPositiveInteger(n_intertimes))
+  stopifnot(missing(times) || .isNumericVector(times))
+  stopifnot(.isBoolean(constantSpeed))
   n_segments <- length(segments)
-  if(is.null(keyTimes)){
+  if(is.null(keyTimes) && missing(times)){
     keyTimes <- seq_len(n_segments + 1L)
   }else if(length(keyTimes) != n_segments + 1L){
     stop("Number of key times must be one more than number of segments.")
   }
-  evaluate <- function(t, value){
-    if((n_times <- length(t)) > 1L){
-      out <- quaternion(n_times)
-      for(j in seq_len(n_times)){
-        out[j] <- evaluate(t[j], value)
-      }
-      return(out)
-    }
-    x <- .select_segment_and_normalize_t(segments, keyTimes, t)
-    segment <- x[["segment"]]
-    s       <- x[["time"]]
-    quats <- .reduce_de_casteljau(segment, s)
-    if(!value){
-      tangent <- log(quats[2L] * onion_inverse(quats[1L]))
-      degree <- length(segment) - 1L
-      tangent * 2 * degree / x[["difftime"]]
-    }else{
-      .slerp(quats[1L], quats[2L], s)
-    }
-  }
   if(constantSpeed){
-    f <- function(t) evaluate(t, FALSE)
-    t0 <- head(keyTimes, -1L)
-    t1 <- keyTimes[-1L]
-    intervals <- cbind(t0, t1)
-    speed <- function(t){
-      sqrt(apply(as.matrix(f(t))[-1L,], 2L, crossprod))
+    if(missing(n_intertimes)){
+      stop("With `constantSpeed=TRUE`, you must supply `n_intertimes`.")
     }
-    integrated_speed <- 0
-    for(i in seq_len(nrow(intervals))){
-      integral <- integrate(speed, intervals[i, 1L], intervals[i, 2L])
-      integrated_speed <- c(integrated_speed, integral[["value"]])
-    }
-    newTimes <- cumsum(integrated_speed)
-    s2t <- Vectorize(function(s){
-      if(s == newTimes[length(newTimes)]){
-        return(keyTimes[length(keyTimes)])
-      }
-      idx <- .check_time(s, newTimes) #+ 1L
-      s <- s - newTimes[idx]
-      t0 <- keyTimes[idx]
-      t1 <- keyTimes[idx+1L]
-      l <- function(t){
-        integrate(speed, t0, t)[["value"]] - s
-      }
-      uniroot(l, c(t0, t1))[["root"]]
-    })
-    feval <- function(s){
-      if((n_s <- length(s)) > 1L){
-        out <- quaternion(n_s)
-        for(j in seq_len(n_s)){
-          out[j] <- feval(s[j])
-        }
-        return(out)
-      }
-      if(s < newTimes[1L] || s > newTimes[length(newTimes)]){
-        warning("Evaluation of function outside its range, returning `NA`.")
-        return(NA_real_)
-      }
-      evaluate(s2t(s), value = TRUE)
-    }
-    attr(feval, "times") <- newTimes
-    feval
   }else{
-    evaluate(times, value = TRUE)
-  }
-}
-
-.calculate_control_quaternions <- function(quaternions, times, tcb){
-  q_1 <- quaternions[1L]
-  q0  <- quaternions[2L]
-  q1  <- quaternions[3L]
-  t_1 <- times[1L]
-  t0  <- times[2L]
-  t1  <- times[3L]
-  T   <- tcb[1L]
-  C   <- tcb[2L]
-  B   <- tcb[3L]
-  a <- (1 - T) * (1 + C) * (1 + B)
-  b <- (1 - T) * (1 - C) * (1 - B)
-  c <- (1 - T) * (1 - C) * (1 + B)
-  d <- (1 - T) * (1 + C) * (1 - B)
-  q_in  <- q0 * onion_inverse(q_1)
-  q_out <- q1 * onion_inverse(q0)
-  v_in  <- log(q_in) / (t0 - t_1)
-  v_out <- log(q_out) / (t1 - t0)
-  v_in  <- as.numeric(v_in)[-1L]
-  v_out <- as.numeric(v_out)[-1L]
-  v0 <- function(weight_in, weight_out){
-    (
-      weight_in * (t1 - t0) * v_in + weight_out * (t0 - t_1) * v_out
-    ) / (t1 - t_1)
-  }
-  out     <- quaternion(length.out = 2L)
-  out[1L] <- exp(
-    as.quaternion(c(0, -v0(c, d) * (t0 - t_1) / 3), single = TRUE)
-  ) * q0
-  out[2L] <- exp(
-    as.quaternion(c(0, v0(a, b) * (t1 - t0) / 3), single = TRUE)
-  ) * q0
-  out
-}
-
-.check_endcondition <- function(endcondition, rotors, times){
-  n_rotors <- length(rotors)
-  n_times <- length(times)
-  if(endcondition == "closed"){
-    prefix <- rotors[n_rotors - 1L]
-    if(dotprod(prefix, rotors[1L]) < 0){
-      prefix <- -prefix
+    if(missing(times) && missing(n_intertimes)){
+      stop(
+        "With `constantSpeed=FALSE`, you must supply `n_intertimes` or `times`."
+      )
     }
-    suffix <- rotors[2L]
-    if(dotprod(rotors[n_rotors], suffix) < 0){
-      suffix <- -suffix
-    }
-    rotors <- c(prefix, rotors, suffix)
-    times <- c(
-      times[1L] - (times[n_times] - times[n_times-1L]),
-      times,
-      times[n_times] + (times[2L] - times[1L])
-    )
-    triples_times <- t(vapply(seq_len(n_times), function(i){
-      times[c(i, i+1L, i+2L)]
-    }, numeric(3L)))
-    triples_rotors <- lapply(seq_len(n_rotors), function(i){
-      rotors[c(i, i+1L, i+2L)]
-    })
+  }
+  if(!constantSpeed && !missing(n_intertimes)){
+    times <- interpolateTimes(keyTimes, n_intertimes, FALSE)
+  }
+  segments <- lapply(segments, .getQMatrix)
+  if(constantSpeed){
+    Q <- DeCasteljau_cpp2(segments, keyTimes, n_intertimes)
   }else{
-    triples_times <- t(vapply(seq_len(n_times), function(i){
-      times[c(i, i+1L, i+2L)]
-    }, numeric(3L)))
-    triples_rotors <- lapply(seq_len(n_rotors-2L), function(i){
-      rotors[c(i, i+1L, i+2L)]
-    })
+    Q <- DeCasteljau_cpp(segments, keyTimes, times) 
   }
-  list("times" = triples_times, "rotors" = triples_rotors)
+  as.quaternion(Q)
 }
 
 .natural_control_quaternion <- function(outer, inner_control){
@@ -293,47 +175,33 @@ KochanekBartels <- function(
   constantSpeed = FALSE
 ){
   endcondition <- match.arg(endcondition, c("closed", "natural"))
+  stopifnot(.isBoolean(constantSpeed))
   closed <- endcondition == "closed"
   keyRotors <- .check_keyRotors(keyRotors, closed)
   n_keyRotors <- length(keyRotors)
-  if(is.null(keyTimes) && !missing(n_intertimes)){
-    stopifnot(.isPositiveInteger(n_intertimes))
-    times <- seq(
-      1, n_keyRotors, length.out = n_intertimes * (n_keyRotors - 1L) + 1L
-    )
-    if(closed){
-      times <- head(times, -1L)
-    }
-  }
   keyTimes <- .check_keyTimes(keyTimes, n_keyRotors)
+  if(!constantSpeed && !missing(n_intertimes)){
+    stopifnot(.isPositiveInteger(n_intertimes))
+    times <- interpolateTimes(keyTimes, n_intertimes, !closed)
+    if(closed){
+      # times <- head(times, -1L)
+    }
+  }else{
+    times <- numeric(0L)
+  }
+  # if(is.null(keyTimes) && !missing(n_intertimes)){
+  #   stopifnot(.isPositiveInteger(n_intertimes))
+  #   times <- seq(
+  #     1, n_keyRotors, length.out = n_intertimes * (n_keyRotors - 1L) + 1L
+  #   )
+  #   if(closed){
+  #     times <- head(times, -1L)
+  #   }
+  # }
+  # keyTimes <- .check_keyTimes(keyTimes, n_keyRotors)
   control_points <- as.quaternion(control_points_cpp(
     keyTimes, as.matrix(keyRotors), closed, tcb[1L], tcb[2L], tcb[3L]
   ))
-  # triples <- .check_endcondition(endcondition, keyRotors, keyTimes)
-  # triples_rotors <- triples[["rotors"]]
-  # triples_times <- triples[["times"]]
-  # triples_rotors <- makeTriplets_rotors(as.matrix(keyRotors), closed)
-  # triples_times <- makeTriplets_times(keyTimes, closed)
-  # control_points <- quaternion(length.out = 0L)
-  # for(i in seq_along(triples_rotors)){
-  #   qs <- as.quaternion(triples_rotors[[i]])
-  #   # qb_qa <- .calculate_control_quaternions(
-  #   #   qs,
-  #   #   triples_times[i, ],
-  #   #   tcb
-  #   # )
-  #   qb_qa <- as.quaternion(cpp_calculate_control_quaternions(
-  #     as.matrix(qs),
-  #     triples_times[i, ],
-  #     tcb[1], tcb[2], tcb[3]
-  #   ))
-  #   
-  #   q_before <- qb_qa[1L]
-  #   q_after  <- qb_qa[2L]
-  #   control_points <- c(
-  #     control_points, q_before, qs[2L], qs[2L], q_after
-  #   )
-  # }
   n_control_points <- length(control_points)
   if(closed){
     stopifnot(4*length(keyTimes) == n_control_points)
@@ -362,9 +230,7 @@ KochanekBartels <- function(
   segments <- lapply(4L*seq_len(length(control_points) %/% 4L)-3L, function(i){
     control_points[c(i, i+1L, i+2L, i+3L)]
   })
-  if(constantSpeed){
-    DeCasteljau(segments, keyTimes, times = times, constantSpeed = TRUE)
-  }else{
-    DeCasteljauCPP(segments, keyTimes, times)
-  }
+  DeCasteljau(
+    segments, keyTimes, n_intertimes, times, constantSpeed
+  )
 }

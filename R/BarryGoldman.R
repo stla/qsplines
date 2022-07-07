@@ -20,7 +20,9 @@
 #' @export
 #' @note The function does not check whether the quaternions given in
 #'   \code{keyRotors} are unit quaternions.
-#'
+#' 
+#' @importFrom utils head
+#' 
 #' @examples 
 #' library(qsplines)
 #' # Using a Barry-Goldman quaternions spline to construct 

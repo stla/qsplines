@@ -4,7 +4,13 @@
 \alias{DeCasteljau}
 \title{Spline using the De Casteljau algorithm}
 \usage{
-DeCasteljau(segments, keyTimes = NULL, times, constantSpeed = FALSE)
+DeCasteljau(
+  segments,
+  keyTimes = NULL,
+  n_intertimes,
+  times,
+  constantSpeed = FALSE
+)
 }
 \arguments{
 \item{segments}{a list of vectors of unit quaternions; each segment must
@@ -14,8 +20,16 @@ contain at least two quaternions}
 increasing vector of length \code{length(segments)+1}; if \code{NULL},
 it is set to \code{1, 2, ..., length(segments)+1}}
 
+\item{n_intertimes}{a positive integer used to linearly interpolate the 
+times given in \code{keyTimes} in order that there are
+\code{n_intertimes - 1} between two key times (so one gets the key
+times if \code{n_intertimes = 1}); this parameter must be given if 
+\code{constantSpeed=TRUE} and if it is given when 
+\code{constantSpeed=FALSE}, then it has precedence over \code{times}}
+
 \item{times}{the interpolating times, they must lie within the range of
-\code{keyTimes}; ignored if \code{constantSpeed=TRUE}}
+\code{keyTimes}; ignored if \code{constantSpeed=TRUE} or if 
+\code{n_intertimes} is given}
 
 \item{constantSpeed}{Boolean, whether to re-parameterize the spline to
 have constant speed; in this case, \code{"times"} is ignored and a
@@ -23,8 +37,8 @@ function is returned, with an attribute \code{"times"}, the vector of
 new times corresponding to the key rotors}
 }
 \value{
-A vector of quaternions having the same length as \code{times},
-  or a function if \code{constantSpeed=TRUE}.
+A vector of quaternions whose length is the number of interpolating 
+  times.
 }
 \description{
 Constructs a quaternions spline using the De Casteljau

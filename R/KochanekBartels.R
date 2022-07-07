@@ -34,8 +34,8 @@
 #'   function is returned, with an attribute \code{"times"}, the vector of
 #'   new times corresponding to the key rotors
 #'
-#' @return A vector of quaternions having the same length as \code{times},
-#'   or a function if \code{constantSpeed=TRUE}.
+#' @return A vector of quaternions whose length is the number of interpolating 
+#'   times.
 #' @export
 #' 
 #' @note This algorithm is rather for internal purpose. It serves for example
@@ -96,20 +96,19 @@ DeCasteljau <- function(
 #'   of the key times; this parameter can be missing if \code{keyTimes} is
 #'   \code{NULL} and \code{n_intertimes} is not missing, and it is ignored if
 #'   \code{constantSpeed=TRUE}
-#' @param n_intertimes should be missing if \code{times} is given; otherwise,
-#'   \code{keyTimes} should be \code{NULL} and \code{times} is constructed by
-#'   linearly interpolating the automatic key times such that there are
+#' @param n_intertimes if given, this argument has precedence over \code{times};
+#'   \code{keyTimes} can be \code{NULL} and \code{times} is constructed by
+#'   linearly interpolating the key times such that there are
 #'   \code{n_intertimes - 1} between two key times (so the times are the key
 #'   times if \code{n_intertimes = 1})
 #' @param endcondition start/end conditions, can be \code{"closed"} or
 #'   \code{"natural"}
-#' @param constantSpeed Boolean, whether to re-parametrize the spline to
-#'   have constant speed; in this case, \code{"times"} is ignored and a
-#'   function is returned, with an attribute \code{"times"}, the vector of
-#'   new times corresponding to the key rotors
+#' @param constantSpeed Boolean, whether to re-parameterize the spline to
+#'   have constant speed; in this case, \code{"times"} is ignored and you 
+#'   must set the interpolating times with the help of \code{n_intertimes}
 #'
 #' @return A vector of quaternions having the same length as the \code{times}
-#'   vector, or a (slow) function if \code{constantSpeed=TRUE}.
+#'   vector.
 #' @export
 #'
 #' @note The algorithm with constant speed is very slow.

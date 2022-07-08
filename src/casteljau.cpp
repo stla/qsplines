@@ -15,20 +15,6 @@ std::vector<qtrn> _select_segment_and_normalize_t(
   return segments[idx];
 }
 
-qtrn _getRQuaternion(Rcpp::NumericVector qR) {
-  qtrn quat(qR(0), qR(1), qR(2), qR(3));
-  return quat;
-}
-
-std::vector<qtrn> _getRQuaternions(Rcpp::NumericMatrix Q) {
-  std::size_t n = Q.ncol();
-  std::vector<qtrn> quats(n);
-  for(std::size_t j = 0; j < n; j++) {
-    quats[j] = _getRQuaternion(Q(Rcpp::_, j));
-  }
-  return quats;
-}
-
 std::vector<std::vector<qtrn>> _getRSegments(Rcpp::List rsegments) {
   std::size_t nsegments = rsegments.size();
   std::vector<std::vector<qtrn>> segments(nsegments);
@@ -38,20 +24,6 @@ std::vector<std::vector<qtrn>> _getRSegments(Rcpp::List rsegments) {
   }
   return segments;
 }
-
-Rcpp::NumericVector _getCQuaternion(qtrn quat) { 
-  return Rcpp::NumericVector::create(quat.a(), quat.b(), quat.c(), quat.d());
-} 
-
-Rcpp::NumericMatrix _getCQuaternions(std::vector<qtrn> quats) { 
-  std::size_t n = quats.size();
-  Rcpp::NumericMatrix Q(4, n);
-  for(std::size_t j = 0; j < n; j++) {
-    Rcpp::NumericVector qR = _getCQuaternion(quats[j]);
-    Q(Rcpp::_, j) = qR;
-  }
-  return Q;
-} 
 
 std::vector<qtrn> _reduce_de_casteljau(std::vector<qtrn> segment, double t) {
   size_t l = segment.size();

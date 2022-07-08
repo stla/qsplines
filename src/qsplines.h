@@ -19,4 +19,9 @@ qtrn slerp(qtrn, qtrn, double);
 
 Rcpp::NumericVector _interpolateTimes(Rcpp::NumericVector, std::size_t, bool);
 
+qtrn _getRQuaternion(Rcpp::NumericVector);
+std::vector<qtrn> _getRQuaternions(Rcpp::NumericMatrix);
+
+Rcpp::NumericMatrix _getCQuaternions(std::vector<qtrn>);
+
 #endif

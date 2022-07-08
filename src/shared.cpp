@@ -98,3 +98,32 @@ Rcpp::NumericVector _interpolateTimes(Rcpp::NumericVector times,
   }
   return newtimes;
 } 
+
+qtrn _getRQuaternion(Rcpp::NumericVector qR) {
+  qtrn quat(qR(0), qR(1), qR(2), qR(3));
+  return quat;
+}
+
+std::vector<qtrn> _getRQuaternions(Rcpp::NumericMatrix Q) {
+  std::size_t n = Q.ncol();
+  std::vector<qtrn> quats(n);
+  for(std::size_t j = 0; j < n; j++) {
+    quats[j] = _getRQuaternion(Q(Rcpp::_, j));
+  }
+  return quats;
+}
+
+Rcpp::NumericVector _getCQuaternion(qtrn quat) { 
+  return Rcpp::NumericVector::create(quat.a(), quat.b(), quat.c(), quat.d());
+} 
+
+Rcpp::NumericMatrix _getCQuaternions(std::vector<qtrn> quats) { 
+  std::size_t n = quats.size();
+  Rcpp::NumericMatrix Q(4, n);
+  for(std::size_t j = 0; j < n; j++) {
+    Rcpp::NumericVector qR = _getCQuaternion(quats[j]);
+    Q(Rcpp::_, j) = qR;
+  }
+  return Q;
+} 
+

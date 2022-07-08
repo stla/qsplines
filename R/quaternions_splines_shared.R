@@ -91,3 +91,12 @@ interpolateTimes <- function(times, n, last = TRUE){
   }
   newtimes
 }
+
+.getQMatrix <- function(quaternions){
+  stopifnot(is.quaternion(quaternions))
+  as.matrix(quaternions)
+}
+
+.isNumericVector <- function(x){
+  is.numeric(x) && !anyNA(x)
+}

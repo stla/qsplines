@@ -30,8 +30,8 @@ qtrn _eval_bg_single(
     }
     t2 = t1 + (keyTimes[1] - keyTimes[0]);
   }else{
-    q2 = keyRotors[idx+1];
-    t2 = keyTimes[idx+1];
+    q2 = keyRotors[idx+2];
+    t2 = keyTimes[idx+2];
   }
   qtrn slerp_0_1 = slerp(q0, q1, (t - t0) / (t1 - t0));
   qtrn quat = slerp(
@@ -62,6 +62,7 @@ std::vector<qtrn> _eval_bg_vector(
   return quats;
 }
 
+// [[Rcpp::export]]
 Rcpp::NumericMatrix BarryGoldman_cpp(
   Rcpp::NumericMatrix keyRotorsR, Rcpp::NumericVector keyTimes, Rcpp::NumericVector times
 ) {

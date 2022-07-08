@@ -10,6 +10,19 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// BarryGoldman_cpp
+Rcpp::NumericMatrix BarryGoldman_cpp(Rcpp::NumericMatrix keyRotorsR, Rcpp::NumericVector keyTimes, Rcpp::NumericVector times);
+RcppExport SEXP _qsplines_BarryGoldman_cpp(SEXP keyRotorsRSEXP, SEXP keyTimesSEXP, SEXP timesSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::NumericMatrix >::type keyRotorsR(keyRotorsRSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type keyTimes(keyTimesSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type times(timesSEXP);
+    rcpp_result_gen = Rcpp::wrap(BarryGoldman_cpp(keyRotorsR, keyTimes, times));
+    return rcpp_result_gen;
+END_RCPP
+}
 // DeCasteljau_cpp
 Rcpp::NumericMatrix DeCasteljau_cpp(Rcpp::List rsegments, Rcpp::NumericVector keyTimes, Rcpp::NumericVector times);
 RcppExport SEXP _qsplines_DeCasteljau_cpp(SEXP rsegmentsSEXP, SEXP keyTimesSEXP, SEXP timesSEXP) {
@@ -54,6 +67,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_qsplines_BarryGoldman_cpp", (DL_FUNC) &_qsplines_BarryGoldman_cpp, 3},
     {"_qsplines_DeCasteljau_cpp", (DL_FUNC) &_qsplines_DeCasteljau_cpp, 3},
     {"_qsplines_control_points_cpp", (DL_FUNC) &_qsplines_control_points_cpp, 6},
     {"_qsplines_DeCasteljau_cpp2", (DL_FUNC) &_qsplines_DeCasteljau_cpp2, 3},

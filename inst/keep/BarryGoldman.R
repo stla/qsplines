@@ -7,18 +7,17 @@
 #' @param keyTimes the times corresponding to the key rotors; must be an
 #'   increasing vector of length \code{length(keyRotors)+1}; if \code{NULL},
 #'   it is set to \code{c(1, 2, ..., length(keyRotors)+1)}
-#' @param n_intertimes a positive integer used to linearly interpolate the 
-#'   times given in \code{keyTimes} in order that there are
-#'   \code{n_intertimes - 1} between two key times (so one gets the key
-#'   times if \code{n_intertimes = 1}); if this argument is given, then 
-#'   it has precedence over \code{times}
-#' @param times the interpolating times, they must lie within the range of
-#'   \code{keyTimes}; ignored if \code{n_intertimes} is given
+#' @param times the times of interpolation; each time must lie within the
+#'   range of the key times; this parameter can be missing if \code{keyTimes}
+#'   is \code{NULL} and \code{n_intertimes} is not missing
+#' @param n_intertimes should be missing if \code{times} is given; otherwise,
+#'   \code{keyTimes} should be \code{NULL} and \code{times} is constructed by
+#'   linearly interpolating the automatic key times such that there are
+#'   \code{n_intertimes - 1} times between two key times (so the times are the 
+#'   key times if \code{n_intertimes = 1})
 #'
 #' @return A vector of unit quaternions with the same length as \code{times}.
-#'
 #' @export
-#'
 #' @note The function does not check whether the quaternions given in
 #'   \code{keyRotors} are unit quaternions.
 #' 
@@ -76,27 +75,69 @@
 #' spheres3d(0, 0, 0, radius = 5, color = "lightgreen")
 #' spheres3d(points, radius = 0.2, color = "midnightblue")
 #' spheres3d(keyPoints, radius = 0.25, color = "red")}
-BarryGoldman <- function(keyRotors, keyTimes = NULL, n_intertimes, times){
+BarryGoldman <- function(keyRotors, keyTimes = NULL, times, n_intertimes){
   stopifnot(is.quaternion(keyRotors))
   stopifnot(is.null(keyTimes) || .isNumericVector(keyTimes))
   stopifnot(missing(n_intertimes) || .isPositiveInteger(n_intertimes))
   stopifnot(missing(times) || .isNumericVector(times))
+  
   keyRotors <- .check_keyRotors(keyRotors, closed = TRUE)
   n_keyRotors <- length(keyRotors)
-  if(is.null(keyTimes) && missing(times)){
-    keyTimes <- seq_len(n_keyRotors)
-  }else if(length(keyTimes) != n_keyRotors){
-    stop("Number of key times must be one more than number of key rotors.")
+  if(is.null(keyTimes) && !missing(n_intertimes)){
+    stopifnot(.isPositiveInteger(n_intertimes))
+    times <- head(seq(
+      1, n_keyRotors, length.out = n_intertimes * (n_keyRotors - 1L) + 1L
+    ), -1L)
   }
-  if(missing(times) && missing(n_intertimes)){
-    stop(
-      "You must supply either `n_intertimes` or `times`."
+  keyTimes <- .check_keyTimes(keyTimes, n_keyRotors)
+  n_keyTimes <- length(keyTimes)
+  evaluate <- function(t){
+    if((n_times <- length(t)) > 1L){
+      out <- quaternion(n_times)
+      for(j in seq_len(n_times)){
+        out[j] <- evaluate(t[j])
+      }
+      return(out)
+    }
+    idx <- .check_time(t, keyTimes, special = TRUE) #+ 1L
+    q0 <- keyRotors[idx]
+    q1 <- keyRotors[idx + 1L]
+    t0 <- keyTimes[idx]
+    t1 <- keyTimes[idx + 1L]
+    if(idx == 1L){
+      q_1 <- keyRotors[n_keyRotors - 1L]
+      if(dotprod(q_1, q0) < 0){
+        q_1 <- -q_1
+      }
+      t_1 <- t0 - (keyTimes[n_keyTimes] - keyTimes[n_keyTimes - 1L])
+    }else{
+      q_1 <- keyRotors[idx-1L]
+      t_1 <- keyTimes[idx-1L]
+    }
+    if(idx + 1L == n_keyRotors){
+      q2 <- keyRotors[2L]
+      if(dotprod(q1, q2) < 0){
+        q2 <- -q2
+      }
+      t2 <- t1 + (keyTimes[2L] - keyTimes[1L])
+    }else{
+      q2 <- keyRotors[idx+2L]
+      t2 <- keyTimes[idx+2L]
+    }
+    slerp_0_1 <- .slerp(q0, q1, (t - t0) / (t1 - t0))
+    .slerp(
+      .slerp(
+        .slerp(q_1, q0, (t - t_1) / (t0 - t_1)),
+        slerp_0_1,
+        (t - t_1) / (t1 - t_1)
+      ),
+      .slerp(
+        slerp_0_1,
+        .slerp(q1, q2, (t - t1) / (t2 - t1)),
+        (t - t0) / (t2 - t0)
+      ),
+      (t - t0) / (t1 - t0)
     )
   }
-  if(!missing(n_intertimes)){
-    times <- interpolateTimes(keyTimes, n_intertimes, FALSE)
-  }
-  keyRotors <- .getQMatrix(keyRotors)
-  Q <- BarryGoldman_cpp(keyRotors, keyTimes, times)
-  as.quaternion(Q)  
+  evaluate(times)
 }

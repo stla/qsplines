@@ -1,12 +1,3 @@
-.getQMatrix <- function(quaternions){
-  stopifnot(is.quaternion(quaternions))
-  as.matrix(quaternions)
-}
-
-.isNumericVector <- function(x){
-  is.numeric(x) && !anyNA(x)
-}
-
 .isBoolean <- function(x){
   is.logical(x) && length(x) == 1L && !is.na(x)
 }

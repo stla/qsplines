@@ -1,4 +1,4 @@
-# qsplines 0.1.0.9000
+# qsplines 1.0.0
 
 Big speed improvement, thanks to 'Rcpp'.
 

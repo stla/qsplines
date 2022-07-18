@@ -731,8 +731,10 @@ inline Quaternion<T> from_euler(const std::array<T, 3>& x) {
  * TODO: is that useful??
  * TODO: provide lexicographic order on quaternions?
  */
+//template <typename T>
+//struct hash : public std::unary_function<Quaternion<T>, size_t> {
 template <typename T>
-struct hash : public std::unary_function<Quaternion<T>, size_t> {
+struct hash {
 
   inline size_t operator()(const Quaternion<T>& x) const {
 
@@ -764,8 +766,11 @@ struct hash : public std::unary_function<Quaternion<T>, size_t> {
  * Lexicographic order on quaternions, which is a total order, but not compatible
  * with the field structure.
  */
+//template <typename T>
+//struct lexicographic_order : std::binary_function<Quaternion<T>, Quaternion<T>, bool> {
+
 template <typename T>
-struct lexicographic_order : std::binary_function<Quaternion<T>, Quaternion<T>, bool> {
+struct lexicographic_order {
   inline constexpr bool operator()(const Quaternion<T>& x, const Quaternion<T>& y) const {
     return x.a() < y.a()
     || (x.a() == y.a() && x.b() < y.b())

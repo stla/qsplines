@@ -51,9 +51,6 @@ A vector of quaternions having the same length as the \code{times}
 Constructs a quaternions spline by the Kochanek-Bartels
   algorithm.
 }
-\note{
-The algorithm with constant speed is very slow.
-}
 \examples{
 library(qsplines)
 # Using a Kochanek-Bartels quaternions spline to construct 
@@ -81,7 +78,7 @@ n_keyPoints <- nrow(keyPoints)
 
 # construction of the key rotors; the first key rotor 
 #   is the identity quaternion and rotor i sends the 
-#     key point i-1 to the key point i
+#     first key point to the i-th key point
 keyRotors <- quaternion(length.out = n_keyPoints)
 rotor <- keyRotors[1L] <- H1
 for(i in seq_len(n_keyPoints - 1L)){

@@ -238,7 +238,7 @@ std::vector<qtrn> _eval2_casteljau_vector(
       Rcpp::Rcout << "FIRST IF; i = " << i << " --- "; // this never happens
       times(i) = keyTimes(nintervals); // -1 ?
     }else if(s <= newTimes(0)){ // i.e. i=0
-      Rcpp::Rcout << "SECOND IF; i = " << i << " --- "; // this happens for i=0
+      //Rcpp::Rcout << "SECOND IF; i = " << i << " --- "; // this happens for i=0
       times(i) = keyTimes(0);
     }else{
       const std::size_t idx = _check_time(s, newTimes, false);
